@@ -58,7 +58,7 @@ class Model():
         self.text_clf = Pipeline([
             ('vect', CountVectorizer()),
             ('tfidf', TfidfTransformer()),
-            ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-4, n_iter=10, random_state=42))])
+            ('clf', SGDClassifier(loss='hinge', penalty='l1', alpha=1e-4, n_iter=10, random_state=42))])
         self.text_clf = self.text_clf.fit(X, y)
 
     def load(self):
@@ -72,5 +72,4 @@ if __name__ == '__main__':
     model = Model(load_model_from_file=False)
     model.train()
     print('Accuracy:', model.evaluate(model.train_data['Speech'], model.train_data['ThemeLabel']))
-    print(model.get_response(model.train_data['Speech'][0]))
     model.save()
