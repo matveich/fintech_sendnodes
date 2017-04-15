@@ -41,13 +41,15 @@ def respond(message):
     global get_response, last_theme
     text = "Critical Error"
     markup = None
-    if message.text.lower() == 'да':
+    yes_mes = ['да', 'конечно', 'угадал', 'точно', 'верно']
+    no_mes = ['нет', 'неа', 'ошибка', 'ошибаешься', 'не']
+    if message.text.lower() in yes_mes:
         text = "В ближайшее время на ваш вопрос ответит оператор"
         if last_theme == 'Курс доллара':
             text = "Текущий курс доллара: 65 рублей. " + text
         elif last_theme == 'Курс евро':
             text = "Текущий курс евро: 70 рублей. " + text
-    elif message.text.lower() == 'нет':
+    elif message.text.lower() in no_mes:
         text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
     else:
         response = get_response(message.text)
