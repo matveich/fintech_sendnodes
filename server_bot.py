@@ -7,11 +7,11 @@ from ml import Model
 
 bot = telebot.TeleBot(cfg.token)
 
-awaiting_confirm = False
-last_theme = None
-
-get_response = None
-
+env_var = {
+    'last_theme': None,
+    'get_response': None,
+    'expected': 'query'
+}
 
 '''
 class WebhookServer(object):
@@ -31,11 +31,34 @@ class WebhookServer(object):
 '''
 
 
-def check_currency(text, last_theme):
-    if last_theme == 'Курс доллара':
+def check_currency(text, lt):
+    if lt == 'Курс доллара':
         text = "Текущий курс доллара: 65 рублей. " + text
-    elif last_theme == 'Курс евро':
+    elif lt == 'Курс евро':
         text = "Текущий курс евро: 70 рублей. " + text
+    return text
+
+
+def classify_answer(mtext):
+    yes_mes = ['да', 'конечно', 'угадал', 'точно', 'верно', 'ага']
+    no_mes = ['нет', 'неа', 'ошибка', 'ошибаешься', 'не']
+    if mtext in yes_mes:
+        return 1
+    elif mtext in no_mes:
+        return 2
+    return 0
+
+
+def check_confirmation(conf_res, expected):
+    if conf_res == 1:
+        if expected == 'confirmation':
+            text = "В ближайшее время на ваш вопрос ответит оператор"
+        elif expected == 'query':
+            return 'Я жду вопроса ^_^'
+        text = check_currency(text, env_var['last_theme'])
+    else:
+        text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
+    env_var['expected'] = 'query'
     return text
 
 
@@ -47,26 +70,20 @@ def greeting(message):
 
 @bot.message_handler(content_types=['text'])
 def respond(message):
-    global get_response, last_theme
+    global env_var
     text = "Critical Error"
     markup = None
-    yes_mes = ['да', 'конечно', 'угадал', 'точно', 'верно', 'ага']
-    no_mes = ['нет', 'неа', 'ошибка', 'ошибаешься', 'не']
-    if message.text.lower() in yes_mes:
-        if not last_theme:
-            text = "😀"
-        else:
-            text = "В ближайшее время на ваш вопрос ответит оператор"
-        text = check_currency(text, last_theme)
-    elif message.text.lower() in no_mes:
-        text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
+    ans_type = classify_answer(message.text.lower())
+    if ans_type:
+        text = check_confirmation(ans_type, env_var['expected'])
     # If user didn't check the answer
     else:
         response = get_response(message.text)
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         if response['type'] == "get_confirmation":
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
-            last_theme = response['pos_themes'][0]
+            env_var['last_theme'] = response['pos_themes'][0]
+            env_var['expected'] = 'confirmation'
             markup.add('Да', 'Нет')
         elif response['type'] == "choose_theme":
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
