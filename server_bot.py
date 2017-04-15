@@ -78,7 +78,7 @@ def respond(message):
         text = check_confirmation(ans_type, env_var['expected'])
     # If user didn't check the answer
     else:
-        response = get_response(message.text)
+        response = env_var['get_response'](message.text)
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         if response['type'] == "get_confirmation":
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
@@ -111,5 +111,5 @@ cherrypy.quickstart(WebhookServer(), cfg.WEBHOOK_URL_PATH, {'/': {}})
 
 if __name__ == '__main__':
     model = Model()
-    get_response = model.get_response
+    env_var['get_response'] = model.get_response
     bot.polling(none_stop=True)
