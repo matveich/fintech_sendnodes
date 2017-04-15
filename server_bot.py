@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import telebot
 import config as cfg
 from ml import Model
@@ -5,6 +7,7 @@ from ml import Model
 bot = telebot.TeleBot(cfg.token)
 
 awaiting_confirm = False
+
 
 def foo():
     pass
@@ -31,21 +34,20 @@ class WebhookServer(object):
 
 @bot.message_handler(commands=['start'])
 def greeting(message):
-    greet_text = "Доброе утро, день, вечер или ночь! Я - бот-консультант по финансовым вопросам. \
-                  Напишите, что вас интересует."
+    greet_text = "Доброе утро, день, вечер или ночь! Я - бот-консультант по финансовым вопросам. Напишите, что вас интересует."
     bot.send_message(message.chat.id, greet_text)
 
 
 @bot.message_handler(content_types=['text'])
 def respond(message):
     global get_response
+    print("Responding")
     text = "Critical Error"
     markup = None
-    if awaiting_confirm:
-        if message.text.lower() == 'да':
-            text = "В ближайшее время на ваш вопрос ответит оператор"
-        elif message.text.lower() == 'нет':
-            text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
+    if message.text.lower() == 'да':
+        text = "В ближайшее время на ваш вопрос ответит оператор"
+    elif message.text.lower() == 'нет':
+        text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
     else:
         response = get_response(message.text)
         if response['type'] == "get_confirmation":
