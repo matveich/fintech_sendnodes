@@ -12,6 +12,7 @@ last_theme = None
 
 get_response = None
 
+
 '''
 class WebhookServer(object):
     @cherrypy.expose
@@ -30,6 +31,14 @@ class WebhookServer(object):
 '''
 
 
+def check_currency(text, last_theme):
+    if last_theme == 'Курс доллара':
+        text = "Текущий курс доллара: 65 рублей. " + text
+    elif last_theme == 'Курс евро':
+        text = "Текущий курс евро: 70 рублей. " + text
+    return text
+
+
 @bot.message_handler(commands=['start'])
 def greeting(message):
     greet_text = "Доброе утро, день, вечер или ночь! Я - бот-консультант по финансовым вопросам. Напишите, что вас интересует."
@@ -41,25 +50,25 @@ def respond(message):
     global get_response, last_theme
     text = "Critical Error"
     markup = None
-    yes_mes = ['да', 'конечно', 'угадал', 'точно', 'верно']
+    yes_mes = ['да', 'конечно', 'угадал', 'точно', 'верно', 'ага']
     no_mes = ['нет', 'неа', 'ошибка', 'ошибаешься', 'не']
     if message.text.lower() in yes_mes:
-        text = "В ближайшее время на ваш вопрос ответит оператор"
-        if last_theme == 'Курс доллара':
-            text = "Текущий курс доллара: 65 рублей. " + text
-        elif last_theme == 'Курс евро':
-            text = "Текущий курс евро: 70 рублей. " + text
+        if not last_theme:
+            text = "😀"
+        else:
+            text = "В ближайшее время на ваш вопрос ответит оператор"
+        text = check_currency(text, last_theme)
     elif message.text.lower() in no_mes:
         text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
+    # If user didn't check the answer
     else:
         response = get_response(message.text)
+        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         if response['type'] == "get_confirmation":
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             last_theme = response['pos_themes'][0]
-            markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('Да', 'Нет')
         elif response['type'] == "choose_theme":
-            markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
             for theme in response['pos_themes']:
                 markup.add(theme)
