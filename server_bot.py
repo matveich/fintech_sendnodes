@@ -8,6 +8,8 @@ def get_response(message):
 
 bot = telebot.TeleBot(cfg.token)
 
+awaiting_confirm = False
+
 '''
 
 class WebhookServer(object):
@@ -36,18 +38,25 @@ def greeting(message):
 
 @bot.message_handler(content_types=['text'])
 def respond(message):
-    response = get_response(message.text)
-    text = ""
+    text = "Critical Error"
     markup = None
-    if response.type == "get_confirmation":
-        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        markup.add('Да', 'Нет')
-    elif response.type == "choose_theme":
-        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        text = "Пожалуйста, уточните, какая из тем вас интересует:"
-        for theme in response.pos_themes:
-            markup.add(theme)
-        markup.add("Никакая из предложенных")
+    if awaiting_confirm:
+        if message.text.lower() == 'да':
+            text = "В ближайшее время на ваш вопрос ответит оператор"
+        elif message.text.lower() == 'нет':
+            text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
+    else:
+        response = get_response(message.text)
+        if response['type'] == "get_confirmation":
+            text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
+            markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+            markup.add('Да', 'Нет')
+        elif response['type'] == "choose_theme":
+            markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+            text = "Пожалуйста, уточните, какая из тем вас интересует:"
+            for theme in response['pos_themes']:
+                markup.add(theme)
+            markup.add("Никакая из предложенных")
 
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
