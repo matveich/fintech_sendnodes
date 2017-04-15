@@ -58,7 +58,7 @@ class Model():
         self.text_clf = Pipeline([
             ('vect', CountVectorizer()),
             ('tfidf', TfidfTransformer()),
-            ('clf', SGDClassifier(loss='perceptron', penalty='l2', alpha=1e-3, n_iter=10, random_state=42))])
+            ('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-4, n_iter=10, random_state=42))])
         self.text_clf = self.text_clf.fit(X, y)
 
     def load(self):
