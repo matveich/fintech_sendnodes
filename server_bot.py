@@ -27,14 +27,29 @@ class WebhookServer(object):
 '''
 
 
+@bot.message_handler(commands=['start'])
+def greeting(message):
+    greet_text = "Доброе утро, день, вечер или ночь! Я - бот-консультант по финансовым вопросам. \
+                  Напишите, что вас интересует."
+    bot.send_message(message.chat.id, greet_text)
+
+
 @bot.message_handler(content_types=['text'])
 def respond(message):
-    response = get_response(message)
-    markup = 0
+    response = get_response(message.text)
+    text = ""
+    markup = None
     if response.type == "get_confirmation":
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         markup.add('Да', 'Нет')
-    bot.send_message(message.chat.id, response.text, reply_markup=markup)
+    elif response.type == "choose_theme":
+        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+        text = "Пожалуйста, уточните, какая из тем вас интересует:"
+        for theme in response.pos_themes:
+            markup.add(theme)
+        markup.add("Никакая из предложенных")
+
+    bot.send_message(message.chat.id, text, reply_markup=markup)
 
 '''
 bot.remove_webhook()
