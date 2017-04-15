@@ -8,6 +8,7 @@ from ml import Model
 bot = telebot.TeleBot(cfg.token)
 
 awaiting_confirm = False
+last_theme = None
 
 get_response = None
 
@@ -28,6 +29,7 @@ class WebhookServer(object):
             raise cherrypy.HTTPError(403)
 '''
 
+
 @bot.message_handler(commands=['start'])
 def greeting(message):
     greet_text = "Доброе утро, день, вечер или ночь! Я - бот-консультант по финансовым вопросам. Напишите, что вас интересует."
@@ -36,17 +38,22 @@ def greeting(message):
 
 @bot.message_handler(content_types=['text'])
 def respond(message):
-    global get_response
+    global get_response, last_theme
     text = "Critical Error"
     markup = None
     if message.text.lower() == 'да':
         text = "В ближайшее время на ваш вопрос ответит оператор"
+        if last_theme == 'Курс доллара':
+            text = "Текущий курс доллара: 65 рублей. " + text
+        elif last_theme == 'Курс евро':
+            text = "Текущий курс евро: 70 рублей. " + text
     elif message.text.lower() == 'нет':
         text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
     else:
         response = get_response(message.text)
         if response['type'] == "get_confirmation":
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
+            last_theme = response['pos_themes'][0]
             markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             markup.add('Да', 'Нет')
         elif response['type'] == "choose_theme":
