@@ -2,7 +2,7 @@
 
 import telebot
 import config as cfg
-import cherrypy
+# import cherrypy
 from ml import Model
 
 bot = telebot.TeleBot(cfg.token)
@@ -41,7 +41,7 @@ def respond(message):
     global get_response, last_theme
     text = "Critical Error"
     markup = None
-    yes_mes = ['да', 'конечно', 'угадал', 'точно', 'верно']
+    yes_mes = ['ага', 'да', 'конечно', 'угадал', 'точно', 'верно']
     no_mes = ['нет', 'неа', 'ошибка', 'ошибаешься', 'не']
     if message.text.lower() in yes_mes:
         text = "В ближайшее время на ваш вопрос ответит оператор"
