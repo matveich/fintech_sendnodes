@@ -11,7 +11,7 @@ awaiting_confirm = False
 
 get_response = None
 
-
+'''
 class WebhookServer(object):
     @cherrypy.expose
     def index(self):
@@ -26,7 +26,7 @@ class WebhookServer(object):
             return ''
         else:
             raise cherrypy.HTTPError(403)
-
+'''
 
 @bot.message_handler(commands=['start'])
 def greeting(message):
@@ -58,7 +58,7 @@ def respond(message):
 
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
-
+'''
 bot.remove_webhook()
 
 bot.set_webhook(url=cfg.WEBHOOK_URL_BASE + cfg.WEBHOOK_URL_PATH, certificate=open(cfg.WEBHOOK_SSL_CERT, 'r'))
@@ -72,9 +72,9 @@ cherrypy.config.update({
 })
 
 cherrypy.quickstart(WebhookServer(), cfg.WEBHOOK_URL_PATH, {'/': {}})
-
+'''
 
 if __name__ == '__main__':
     model = Model()
     get_response = model.get_response
-    # bot.polling(none_stop=True)
+    bot.polling(none_stop=True)
