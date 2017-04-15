@@ -1,6 +1,5 @@
 get response возвращает объект response
 Поля response:
-    text - текст ответа в соответствии с user stories
     pos_themes -  список возможных тем (1-4)
     type:'get_confirmation' - вернул одну тему в text
          'choose_theme' - text предлагает выбрать темы из pos_themes
