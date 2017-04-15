@@ -20,4 +20,4 @@ def get_response(message):
 
 
 if __name__ == '__main__':
-    pass
+    print('lol')
