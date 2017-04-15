@@ -4,13 +4,15 @@ import telebot
 import config as cfg
 import cherrypy
 from ml import Model
+from threading import Timer
 
 bot = telebot.TeleBot(cfg.token)
 
 env_var = {
     'last_theme': None,
     'get_response': None,
-    'expected': 'query'
+    'expected': 'query',
+    'timer': None
 }
 
 '''
@@ -59,8 +61,12 @@ def check_confirmation(conf_res, expected):
     else:
         text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
     env_var['expected'] = 'query'
+    env_var['timer'].cancel()
     return text
 
+
+def remind():
+    pass
 
 @bot.message_handler(commands=['start'])
 def greeting(message):
@@ -84,6 +90,7 @@ def respond(message):
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             env_var['last_theme'] = response['pos_themes'][0]
             env_var['expected'] = 'confirmation'
+            env_var['timer'] = Timer(30.0, remind)
             markup.add('Да', 'Нет')
         elif response['type'] == "choose_theme":
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
