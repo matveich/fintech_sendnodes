@@ -1,15 +1,15 @@
 import telebot
 import config as cfg
-
-
-def get_response(message):
-    return "Привет?"
-
+from ml import Model
 
 bot = telebot.TeleBot(cfg.token)
 
 awaiting_confirm = False
 
+def foo():
+    pass
+
+get_response = foo
 '''
 
 class WebhookServer(object):
@@ -38,6 +38,7 @@ def greeting(message):
 
 @bot.message_handler(content_types=['text'])
 def respond(message):
+    global get_response
     text = "Critical Error"
     markup = None
     if awaiting_confirm:
@@ -77,4 +78,6 @@ cherrypy.quickstart(WebhookServer(), cfg.WEBHOOK_URL_PATH, {'/': {}})
 '''
 
 if __name__ == '__main__':
+    model = Model()
+    get_response = model.get_response
     bot.polling(none_stop=True)
