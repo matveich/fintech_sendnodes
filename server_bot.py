@@ -2,19 +2,16 @@
 
 import telebot
 import config as cfg
+import cherrypy
 from ml import Model
 
 bot = telebot.TeleBot(cfg.token)
 
 awaiting_confirm = False
 
+get_response = None
 
-def foo():
-    pass
-
-get_response = foo
 '''
-
 class WebhookServer(object):
     @cherrypy.expose
     def index(self):
@@ -31,7 +28,6 @@ class WebhookServer(object):
             raise cherrypy.HTTPError(403)
 '''
 
-
 @bot.message_handler(commands=['start'])
 def greeting(message):
     greet_text = "Доброе утро, день, вечер или ночь! Я - бот-консультант по финансовым вопросам. Напишите, что вас интересует."
@@ -41,7 +37,6 @@ def greeting(message):
 @bot.message_handler(content_types=['text'])
 def respond(message):
     global get_response
-    print("Responding")
     text = "Critical Error"
     markup = None
     if message.text.lower() == 'да':
