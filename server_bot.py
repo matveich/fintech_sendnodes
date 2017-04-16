@@ -133,7 +133,7 @@ def respond(message):
         print(env_var['context'])
         response = env_var['get_response'](env_var['context'])
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        if len(response['pos_themes']) == 1:
+        if len(response) == 1:
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             env_var['last_theme'] = response['pos_themes'][0]
             if env_var['expected'] == 'query':
@@ -145,10 +145,10 @@ def respond(message):
             env_var['timer'].start()
             env_var['timer_desc'] = "Напомнить про конфёрм"
             markup.add('Да', 'Нет')
-        elif len(response['pos_themes']) < 5:
+        elif len(response) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
             for theme in response['pos_themes']:
-                markup.add(theme)
+                markup.row(theme[0], theme[1])
             markup.add("Никакая из предложенных")
         else:
             text = "Произошла ошибка определения, обратитесь к Рыбкину."
