@@ -132,6 +132,7 @@ def respond(message):
         num = message.text.lower().split('.')[0]
         if 0 < num < 5:
             text = "В ближайшее время на ваш запрос ответит оператор"
+            env_var['expected'] = 'query'
         else:
             text = "Номер темы указан неправильно. Уточните, какая тема вас интересует."
     else:
