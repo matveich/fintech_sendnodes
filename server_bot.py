@@ -122,12 +122,16 @@ def respond(message):
     ans_type = classify_answer(message.text.lower())
     if ans_type:
         text = check_confirmation(ans_type, env_var['expected'], message)
-    elif env_var['expected'] == 'choice':
-        pass
+    elif env_var['expected'] == 'choice' and type(message.text.lower().split('.')[0]) is int:
+        num = message.text.lower().split('.')[0]
+        if 0 < num < 5:
+            text = "В ближайшее время на ваш запрос ответит оператор"
+        else:
+            text = "Номер темы указан неправильно. Уточните, какая тема вас интересует."
     else:
         if env_var['expected'] == 'retry':
             env_var['context'] = env_var['context'] + ". " + message.text
-        elif env_var['expected'] == 'query':
+        elif env_var['expected'] == 'query' or env_var['expected'] == 'choice':
             env_var['context'] = message.text
         else:
             print("Expectations failed. Abort now!")
