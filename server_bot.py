@@ -138,7 +138,8 @@ def respond(message):
             env_var['last_theme'] = response['pos_themes'][0]
             if env_var['expected'] == 'query':
                 env_var['expected'] = 'confirmation'
-            env_var['timer'].cancel()
+            if env_var['timer']:
+                env_var['timer'].cancel()
             print(env_var['timer_desc'] + " отменён")
             env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])  # TODO поставить 30 секунд
             env_var['timer'].start()
