@@ -116,6 +116,12 @@ class Model:
 
 
 if __name__ == '__main__':
+    """import requests
+    import shutil
+    f = requests.get('http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv', stream=True)
+    with open('228.csv', 'wb') as lf:
+        f.raw.decode_content = True
+        shutil.copyfileobj(f.raw, lf)"""
     """
     model = Model(load_model_from_file=True)
     test_data = pd.read_csv('test.csv')
