@@ -14,6 +14,8 @@ model = Model()
 
 users = {}
 
+log = open('log.txt', 'w')
+
 env_var = {
     'last_theme': None,
     'get_response': None,
@@ -129,6 +131,7 @@ def greeting(message):
 
 @bot.message_handler(content_types=['text'])
 def respond(message):
+    log.write(message)
     global env_var, users
     user_id = message.chat.id
     if user_id not in users.keys():
@@ -212,6 +215,7 @@ def respond(message):
 
 @bot.message_handler(content_types=['document'])
 def eval_csv(message):
+    log.write(message)
     file_info = bot.get_file(message.document.file_id)
     file_name = message.document.file_name
     f = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(cfg.token, file_info.file_path), stream=True)
