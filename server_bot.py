@@ -107,7 +107,7 @@ def check_confirmation(conf_res, expected, user_id):
 
 def remind(user_id, text, fail=False):  # TODO написать
     bot.send_message(user_id, text)
-    users[user_id]['timer'] = Timer(180.0, forget, [user_id, fail])  # TODO поставить 180
+    users[user_id]['timer'] = Timer(10.0, forget, [user_id, fail])  # TODO поставить 180
     users[user_id]['timer'].start()
     users[user_id]['timer_desc'] = "Ждём чтобы забыть"
 
