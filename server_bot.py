@@ -67,14 +67,16 @@ def check_confirmation(conf_res, expected, message):
             text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
             env_var['expected'] = 'retry'
             print("Awaiting retry")
+            env_var['timer'].cancel()
             env_var['timer'] = Timer(30.0, remind,
                                      [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос."])
             env_var['timer'].start()
             env_var['try_count'] = 1
         elif expected == 'retry':
-            if env_var['try_count'] < 3:
+            if env_var['try_count'] < 2:
                 text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
                 env_var['try_count'] += 1
+                env_var['timer'].cancel()
                 env_var['timer'] = Timer(30.0, remind,
                                          [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос."])
                 env_var['timer'].start()
