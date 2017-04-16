@@ -147,7 +147,7 @@ def respond(message):
             markup.add('Да', 'Нет')
         elif len(response) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
-            for theme in response['pos_themes']:
+            for theme in response:
                 markup.row(theme[0], theme[1])
             markup.add("Никакая из предложенных")
         else:
