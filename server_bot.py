@@ -88,7 +88,7 @@ def check_confirmation(conf_res, expected, user_id):
                 users[user_id]['timer'].cancel()
                 print(users[user_id]['timer_desc'] + "  отменён")
                 users[user_id]['timer'] = Timer(30.0, remind,
-                                         [user_id, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос ещё раз."])
+                                         [user_id, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос ещё раз.", True])
                 users[user_id]['timer'].start()
                 users[user_id]['timer_desc'] = "Ожидание перефразирования в %d раз" % users[user_id]['try_count']
                 print("Try no. %d" % users[user_id]['try_count'])
@@ -103,15 +103,17 @@ def check_confirmation(conf_res, expected, user_id):
     return text
 
 
-def remind(user_id, text):  # TODO написать
+def remind(user_id, text, fail=False):  # TODO написать
     bot.send_message(user_id, text)
-    users[user_id]['timer'] = Timer(180.0, forget, [user_id])  # TODO поставить 180
+    users[user_id]['timer'] = Timer(180.0, forget, [user_id, fail])  # TODO поставить 180
     users[user_id]['timer'].start()
     users[user_id]['timer_desc'] = "Ждём чтобы забыть"
 
 
-def forget(user_id):
+def forget(user_id, fail=False):
     users[user_id]['timer'].cancel()
+    if fail:
+        bot.send_message(user_id, "Ок, похоже, мы оба запутались. Давайте начнём заново :)")
     print(users[user_id]['timer_desc'] + " отменён")
     users[user_id]['expected'] = 'query'
 
