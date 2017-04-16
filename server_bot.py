@@ -71,7 +71,7 @@ def check_confirmation(conf_res, expected):
             if env_var['try_count'] < 3:
                 text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
                 env_var['try_count'] += 1
-                print("Try no. " + env_var['try_count'])
+                print("Try no. %d" % env_var['try_count'])
             else:
                 text = "Ок, я запутался, давайте начнём заново :)"
                 env_var['expected'] = 'query'
