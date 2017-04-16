@@ -140,6 +140,7 @@ def respond(message):
                 env_var['expected'] = 'confirmation'
             env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])  # TODO поставить 30 секунд
             env_var['timer'].start()
+            env_var['timer_desc'] = "Ждём чтобы забыть"
             markup.add('Да', 'Нет')
         elif len(response['pos_themes']) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
