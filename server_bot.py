@@ -70,13 +70,13 @@ def check_confirmation(conf_res, expected):
             if env_var['try_count'] < 3:
                 text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
                 env_var['try_count'] += 1
+                print("Try no. " + env_var['try_count'])
             else:
                 text = "Ок, я запутался, давайте начнём заново :)"
                 env_var['expected'] = 'query'
                 env_var['try_count'] = 0
 
     env_var['timer'].cancel()
-    print("Timer off")
     return text
 
 
@@ -87,12 +87,9 @@ def remind_confirm(message):  # TODO написать
 
 
 def forget():
-    try:
-        env_var['timer'].cancel()
-        env_var['expected'] = 'query'
-        print("Theme forgotten, moving on")
-    except AttributeError:
-        print("Cancelling timer failed")
+
+    env_var['timer'].cancel()
+    env_var['expected'] = 'query'
 
 
 @bot.message_handler(commands=['start'])
@@ -124,7 +121,6 @@ def respond(message):
             env_var['expected'] = 'confirmation'
             env_var['timer'] = Timer(30.0, remind_confirm, [message])  # TODO поставить 30 секунд
             env_var['timer'].start()
-            print("Timer set and counting")
             markup.add('Да', 'Нет')
         elif len(response['pos_themes']) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
