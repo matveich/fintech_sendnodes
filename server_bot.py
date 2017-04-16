@@ -4,6 +4,7 @@ import telebot
 import config as cfg
 import cherrypy
 import requests
+import shutil
 import os
 from ml import Model
 from threading import Timer
@@ -211,16 +212,17 @@ def respond(message):
 
 @bot.message_handler(content_types=['document'])
 def eval_csv(message):
-    print(message)
     file_info = bot.get_file(message.document.file_id)
     file_name = message.document.file_name
-    f = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(cfg.token, file_info.file_path))
-    print(f)
-    print(file_name)
-    model.eval_csv(f, file_name)
-    out_csv = open(file_name, 'rb')
+    f = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(cfg.token, file_info.file_path), stream=True)
+    with open(file_name, 'wb') as lf:
+        f.raw.decode_content = True
+        shutil.copyfileobj(f.raw, lf)
+    model.eval_csv(file_name)
+    out_csv = open('out_' + file_name, 'rb')
     bot.send_document(message.chat.id, out_csv)
     os.remove(file_name)
+    os.remove('out_' + file_name)
 
 '''
 bot.remove_webhook()
