@@ -100,8 +100,8 @@ class Model:
         self.clf = GridSearchCV(text_clf, params, n_jobs=-1, cv=4)
         self.clf = self.clf.fit(X, y)
 
-    def eval_csv(self, name):
-        data = pd.read_csv(name)
+    def eval_csv(self, csv_file, name):
+        data = pd.read_csv(csv_file)
         df = pd.DataFrame({
             'Index': data['Index'],
             'ThemeLabel': [x.index(max(x)) for x in self.evaluate(data['Speech'])]
@@ -116,6 +116,12 @@ class Model:
 
 
 if __name__ == '__main__':
+    """import requests
+    import shutil
+    f = requests.get('http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv', stream=True)
+    with open('228.csv', 'wb') as lf:
+        f.raw.decode_content = True
+        shutil.copyfileobj(f.raw, lf)"""
     """
     model = Model(load_model_from_file=True)
     test_data = pd.read_csv('test.csv')
