@@ -5,7 +5,6 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
 from sklearn.externals import joblib
 from sklearn import metrics
 from nltk.corpus import stopwords
@@ -21,7 +20,9 @@ class Model:
         self.train_data = pd.read_csv('train.csv')
         self.X = self.train_data['Speech']
         self.y = self.train_data['ThemeLabel']
+        self.n = 7000
         self.clf = None
+        self.delta = 0.3
         self.morph = pymorphy2.MorphAnalyzer()
         if load_model_from_file:
             self.load()
@@ -32,17 +33,16 @@ class Model:
 
     def get_response(self, message):
         message = [self.normalize(message)]
-        num_labels = self.clf.predict(message)
-        labels = [self.themes[x] for x in num_labels]
-        response = {
-            'pos_themes': labels,
-            'type': 'choose_theme' if len(labels) > 1 else 'get_confirmation'
-        }
-        return response
+        num_labels = zip(list(range(len(self.themes))), self.evaluate(message)[0])
+        num_labels = list(filter(lambda x: x[1] >= self.delta, num_labels))
+        num_labels = sorted(num_labels, key=lambda x: x[1], reverse=True)
+        num_labels = num_labels[:min(4, len(num_labels))]
+        num_labels = [(x, model.themes[x]) for x, y in num_labels]
+        return num_labels
 
-    def evaluate(self, X, y):
+    def evaluate(self, X):
         X = [self.normalize(txt) for txt in X]
-        predicted = self.clf.predict(X)
+        predicted = self.clf.predict_proba(X)
         return predicted
 
     def normalize(self, text):
@@ -58,23 +58,23 @@ class Model:
         return ' '.join(tmp_list)
 
     def train(self):
-        X = [self.normalize(txt) for txt in self.X]
-        y = self.y
+        X = [self.normalize(txt) for txt in self.train_data['Speech']]
+        y = self.train_data['ThemeLabel']
         text_clf = Pipeline([
             ('vect', CountVectorizer()),
             ('tfidf', TfidfTransformer()),
-            ('clf', SVC())])
-        parameters = {
-            'vect__max_features': (None, 1000, 5000),
-            'vect__ngram_range': ((1, 1), (1, 2)),
+            ('clf', SGDClassifier())])
+        params = {
+            'vect__ngram_range': [(1, 1), (1, 2)],
             'tfidf__use_idf': (True, False),
             'tfidf__norm': ('l1', 'l2'),
-            'clf__C': [1, 10, 0.1, 0.5],
-            'clf__kernel': ['rbf', 'poly', 'linear', 'sigmoid'],
-            'clf__degree': [1, 2, 3],
-            'clf__gamma': ['auto', 1e-3, 1e-4]
+            'tfidf__use_idf': (True, False),
+            'clf__loss': ['log', 'modified_huber'],
+            'clf__n_iter': [10],
+            'clf__alpha': (1e-2, 1e-3, 1e-4),
+            'clf__penalty': ('none', 'l1', 'l2', 'elasticnet'),
         }
-        self.clf = GridSearchCV(text_clf, parameters, n_jobs=-1, cv=4)
+        self.clf = GridSearchCV(text_clf, params, n_jobs=-1, cv=4)
         self.clf = self.clf.fit(X, y)
 
     def load(self):
@@ -85,11 +85,18 @@ class Model:
 
 
 if __name__ == '__main__':
-    model = Model(load_model_from_file=False)
-    model.train()
-    X = model.train_data['Speech']
-    y = model.train_data['ThemeLabel']
-    eval = model.evaluate(X, y)
-    metric = metrics.classification_report(y, eval, target_names=model.themes)
-    print(metric)
-    model.save()
+    model = Model(load_model_from_file=True)
+    """test_data = pd.read_csv('test.csv')
+    test_X = test_data['Speech']
+    df = pd.DataFrame({
+        'Index': test_data['Index'],
+        'Speech': test_X,
+        'ThemeLabel': [model.themes[x] for x in model.evaluate(test_X)]
+    })
+    df.to_csv('solution_fintech31bot_test.csv', index=False, sep=',', encoding='utf-8')"""
+    # model.train()
+    # eval = model.evaluate(model.X)
+    # metric = metrics.classification_report(model.y, eval, target_names=model.themes)
+    # print(metric)
+    # model.save()
+    # model.get_response("если я снимаю карты с карты деньги сбербанке с меня комиссии взимается")
