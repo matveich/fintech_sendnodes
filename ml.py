@@ -38,18 +38,34 @@ class Model:
         num_labels = list(filter(lambda x: x[1] >= self.delta, num_labels))
         num_labels = sorted(num_labels, key=lambda x: x[1], reverse=True)
         num_labels = num_labels[:min(4, len(num_labels))]
-        print(num_labels)
         num_labels = [(x, self.themes[x]) for x, y in num_labels]
         return num_labels
 
     def reg_coef(self, n, k):
         if n == 0:
-            return k * 0.8
+            return k * 0.9
+        if n == 10:
+            return k * 0.88
+        if n == 9:
+            return k * 0.925
+        if n == 19:
+            return k * 1.15
+        if n == 20:
+            return k * 0.925
+        if n == 28:
+            return k * 1.12
+        if n == 29:
+            return k * 1.07
+        if n == 31:
+            return k * 0.88
+        if n == 32:
+            return k * 1.1
         return k
 
     def evaluate(self, X):
         X = [self.normalize(txt) for txt in X]
         predicted = self.clf.predict_proba(X)
+        predicted = [[self.reg_coef(i, p[i]) for i in range(len(p))] for p in predicted]
         return predicted
 
     def normalize(self, text):
@@ -84,6 +100,14 @@ class Model:
         self.clf = GridSearchCV(text_clf, params, n_jobs=-1, cv=4)
         self.clf = self.clf.fit(X, y)
 
+    def eval_csv(self, csv_file):
+        data = pd.read_csv(csv_file)
+        df = pd.DataFrame({
+            'Index': data['Index'],
+            'ThemeLabel': [x.index(max(x)) for x in model.evaluate(data['Speech'])]
+        })
+        return df
+
     def load(self):
         self.clf = joblib.load('model.pkl')
 
@@ -93,17 +117,22 @@ class Model:
 
 if __name__ == '__main__':
     model = Model(load_model_from_file=True)
-    """test_data = pd.read_csv('test.csv')
+    test_data = pd.read_csv('test.csv')
     test_X = test_data['Speech']
     df = pd.DataFrame({
         'Index': test_data['Index'],
-        'Speech': test_X,
-        'ThemeLabel': [model.themes[x] for x in model.evaluate(test_X)]
+        'ThemeLabel': [x.index(max(x)) for x in model.evaluate(test_X)]
     })
-    df.to_csv('solution_fintech31bot_test.csv', index=False, sep=',', encoding='utf-8')"""
+    df.to_csv('solution_fintech31bot.csv', index=False, sep=',', encoding='utf-8')
+    df_test = pd.DataFrame({
+        'Index': test_data['Index'],
+        'Speech': test_X,
+        'ThemeLabel': [model.themes[x.index(max(x))] for x in model.evaluate(test_X)]
+    })
+    df_test.to_csv('solution_fintech31bot_test.csv', index=False, sep=',', encoding='utf-8')
     # model.train()
-    eval = model.evaluate(model.X)
-    metric = metrics.classification_report(model.y, eval, target_names=model.themes)
-    print(metric)
+    # eval = model.evaluate(model.X)
+    # metric = metrics.classification_report(model.y, eval, target_names=model.themes)
+    # print(metric)
     # model.save()
-    print(model.get_response("банкомат захватил карточку"))
+    # print(model.get_response("где поблизости банкомат с самым высоким курсом доллара"))
