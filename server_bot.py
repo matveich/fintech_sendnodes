@@ -108,7 +108,7 @@ def check_confirmation(conf_res, expected, user_id):
 
 def remind(user_id, text, fail=False):  # TODO написать
     bot.send_message(user_id, text)
-    users[user_id]['timer'] = Timer(10.0, forget, [user_id, fail])  # TODO поставить 180
+    users[user_id]['timer'] = Timer(180.0, forget, [user_id, fail])  # TODO поставить 180
     users[user_id]['timer'].start()
     users[user_id]['timer_desc'] = "Ждём чтобы забыть"
 
@@ -139,7 +139,8 @@ def respond(message):
             'timer': None,
             'timer_desc': '',
             'try_count': 0,
-            'context': None
+            'context': None,
+            'ltn': 0
         }
 
     markup = None
@@ -147,12 +148,12 @@ def respond(message):
     ans_type = classify_answer(message.text.lower())
     if ans_type:
         text = check_confirmation(ans_type, users[user_id]['expected'], user_id)
-    elif users[user_id]['expected'] == 'choice':
-        if message.text.lower().split(".")[1] == "никакая из предложенных":
+    elif users[user_id]['expected'] == 'choice' and 0 < int(message.text.lower().split('.')[0]) < 6:
+        num = int(message.text.lower().split('.')[0])
+        if num == users[user_id]['ltn']:
             text = "Не смогли определить тему вашего вопроса. Попробуйте ещё раз"
             users[user_id]['expected'] = 'query'
         else:
-            num = int(message.text.lower().split('.')[0])
             if 0 < num < 5:
                 text = "В ближайшее время на ваш запрос ответит оператор"
                 users[user_id]['expected'] = 'query'
@@ -189,6 +190,7 @@ def respond(message):
                 i += 1
                 markup.add("%d. %s" % (i, theme[1]))
             i += 1
+            users[user_id]['ltn'] = i
             markup.add("%d.Никакая из предложенных" % i)
             users[user_id]['expected'] = 'choice'
             # TODO ДОЛЛАРЫ
