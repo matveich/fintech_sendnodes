@@ -129,7 +129,7 @@ def respond(message):
     if ans_type:
         text = check_confirmation(ans_type, env_var['expected'], message)
     elif env_var['expected'] == 'choice':
-        num = message.text.lower().split('.')[0]
+        num = int(message.text.lower().split('.')[0])
         if 0 < num < 5:
             text = "В ближайшее время на ваш запрос ответит оператор"
             env_var['expected'] = 'query'
