@@ -173,6 +173,7 @@ def respond(message):
                 else:
                     text = "Ок, похоже мы оба запутались. Давайте начнём заново :)"
                     users[user_id]['ans_att'] = 0
+                    users[user_id]['expected'] = 'query'
         users[user_id]['timer'].cancel()
         print(users[user_id]['timer_desc'] + ' отменён')
     else:
