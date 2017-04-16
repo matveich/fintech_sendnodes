@@ -65,6 +65,7 @@ def check_confirmation(conf_res, expected):
         if expected == 'confirmation':
             text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
             env_var['expected'] = 'retry'
+            print("Awaiting retry")
             env_var['try_count'] = 1
         elif expected == 'retry':
             if env_var['try_count'] < 3:
