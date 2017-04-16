@@ -131,7 +131,8 @@ def greeting(message):
 
 @bot.message_handler(content_types=['text'])
 def respond(message):
-    log.write(str(message) + '\n')
+    print(message)
+    # bot.send_message(str(message))
     global env_var, users
     user_id = message.chat.id
     if user_id not in users.keys():
