@@ -147,12 +147,12 @@ def respond(message):
     ans_type = classify_answer(message.text.lower())
     if ans_type:
         text = check_confirmation(ans_type, users[user_id]['expected'], user_id)
-    elif users[user_id]['expected'] == 'choice':
-        if message.text.lower().split(".")[0] == users[user_id]['ltn']:
+    elif users[user_id]['expected'] == 'choice' and 0 < int(message.text.lower().split('.')[0]) < 6:
+        num = int(message.text.lower().split('.')[0])
+        if num == users[user_id]['ltn']:
             text = "Не смогли определить тему вашего вопроса. Попробуйте ещё раз"
             users[user_id]['expected'] = 'query'
         else:
-            num = int(message.text.lower().split('.')[0])
             if 0 < num < 5:
                 text = "В ближайшее время на ваш запрос ответит оператор"
                 users[user_id]['expected'] = 'query'
