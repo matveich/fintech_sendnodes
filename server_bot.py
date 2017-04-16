@@ -122,7 +122,8 @@ def respond(message):
     ans_type = classify_answer(message.text.lower())
     if ans_type:
         text = check_confirmation(ans_type, env_var['expected'], message)
-    # If user didn't check the answer
+    elif env_var['expected'] == 'choice':
+        pass
     else:
         if env_var['expected'] == 'retry':
             env_var['context'] = env_var['context'] + ". " + message.text
@@ -134,22 +135,32 @@ def respond(message):
         response = env_var['get_response'](env_var['context'])
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         if len(response) == 1:
-            text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
-            env_var['last_theme'] = response['pos_themes'][0]
+            text = "Вас интересует тема \"%s\". Да?" % response[0][1]
+            env_var['last_theme'] = response[0][1]
             if env_var['expected'] == 'query':
                 env_var['expected'] = 'confirmation'
             if env_var['timer']:
                 env_var['timer'].cancel()
-            print(env_var['timer_desc'] + " отменён")
+                print(env_var['timer_desc'] + " отменён")
             env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])
             env_var['timer'].start()
             env_var['timer_desc'] = "Напомнить про конфёрм"
             markup.add('Да', 'Нет')
         elif len(response) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
+            i = 0
             for theme in response:
-                markup.row("%d" % theme[0], theme[1])
+                i += 1
+                markup.add("%d. %s" % (i, theme[1]))
             markup.add("Никакая из предложенных")
+            env_var['expected'] = 'choice'
+            # TODO ДОЛЛАРЫ
+            if env_var['timer']:
+                env_var['timer'].cancel()
+                print(env_var['timer_desc'] + " отменён")
+            env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Выберите одну из предложенных тем."])
+            env_var['timer'].start()
+            env_var['desc'] = "Напомнить выбор"
         else:
             text = "Произошла ошибка определения, обратитесь к Рыбкину."
 
