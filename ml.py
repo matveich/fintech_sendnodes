@@ -100,13 +100,13 @@ class Model:
         self.clf = GridSearchCV(text_clf, params, n_jobs=-1, cv=4)
         self.clf = self.clf.fit(X, y)
 
-    def eval_csv(self, csv_file):
+    def eval_csv(self, csv_file, name):
         data = pd.read_csv(csv_file)
         df = pd.DataFrame({
             'Index': data['Index'],
             'ThemeLabel': [x.index(max(x)) for x in model.evaluate(data['Speech'])]
         })
-        return df
+        df.to_csv(name, sep=',', index=False, encoding='utf-8')
 
     def load(self):
         self.clf = joblib.load('model.pkl')
