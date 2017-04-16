@@ -129,12 +129,15 @@ def respond(message):
     if ans_type:
         text = check_confirmation(ans_type, env_var['expected'], message)
     elif env_var['expected'] == 'choice':
-        num = int(message.text.lower().split('.')[0])
-        if 0 < num < 5:
-            text = "В ближайшее время на ваш запрос ответит оператор"
-            env_var['expected'] = 'query'
+        if message.text.lower().split(".")[1] == "Никакая из предложенных":
+            text = "Не смогли определить тему вашего вопроса. Попробуйте ещё раз"
         else:
-            text = "Номер темы указан неправильно. Уточните, какая тема вас интересует."
+            num = int(message.text.lower().split('.')[0])
+            if 0 < num < 5:
+                text = "В ближайшее время на ваш запрос ответит оператор"
+                env_var['expected'] = 'query'
+            else:
+                text = "Номер темы указан неправильно. Уточните, какая тема вас интересует."
     else:
         if env_var['expected'] == 'retry':
             env_var['context'] = env_var['context'] + ". " + message.text
@@ -163,7 +166,8 @@ def respond(message):
             for theme in response:
                 i += 1
                 markup.add("%d. %s" % (i, theme[1]))
-            markup.add("Никакая из предложенных")
+            i += 1
+            markup.add("%d.Никакая из предложенных" % i)
             env_var['expected'] = 'choice'
             # TODO ДОЛЛАРЫ
             if env_var['timer']:
@@ -176,6 +180,7 @@ def respond(message):
             text = "Произошла ошибка определения, обратитесь к Рыбкину."
 
     bot.send_message(message.chat.id, text, reply_markup=markup)
+
 
 @bot.message_handler(content_types=['document'])
 def eval_csv(message):
