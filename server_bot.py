@@ -88,7 +88,6 @@ def remind_confirm(message):  # TODO написать
 
 
 def forget():
-
     env_var['timer'].cancel()
     env_var['expected'] = 'query'
 
@@ -119,7 +118,8 @@ def respond(message):
         if len(response['pos_themes']) == 1:
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             env_var['last_theme'] = response['pos_themes'][0]
-            env_var['expected'] = 'confirmation'
+            if env_var['expected'] == 'query':
+                env_var['expected'] = 'confirmation'
             env_var['timer'] = Timer(30.0, remind_confirm, [message])  # TODO поставить 30 секунд
             env_var['timer'].start()
             markup.add('Да', 'Нет')
