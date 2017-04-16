@@ -128,7 +128,7 @@ def respond(message):
     ans_type = classify_answer(message.text.lower())
     if ans_type:
         text = check_confirmation(ans_type, env_var['expected'], message)
-    elif env_var['expected'] == 'choice' and type(message.text.lower().split('.')[0]) is int:
+    elif env_var['expected'] == 'choice':
         num = message.text.lower().split('.')[0]
         if 0 < num < 5:
             text = "В ближайшее время на ваш запрос ответит оператор"
