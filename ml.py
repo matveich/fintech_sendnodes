@@ -100,8 +100,8 @@ class Model:
         self.clf = GridSearchCV(text_clf, params, n_jobs=-1, cv=4)
         self.clf = self.clf.fit(X, y)
 
-    def eval_csv(self, csv_file, name):
-        data = pd.read_csv(csv_file)
+    def eval_csv(self, name):
+        data = pd.read_csv(name)
         df = pd.DataFrame({
             'Index': data['Index'],
             'ThemeLabel': [x.index(max(x)) for x in self.evaluate(data['Speech'])]
