@@ -119,6 +119,7 @@ def greeting(message):
 def respond(message):
     global env_var
     markup = None
+    text = "Problemes"
     ans_type = classify_answer(message.text.lower())
     if ans_type:
         text = check_confirmation(ans_type, env_var['expected'], message)
