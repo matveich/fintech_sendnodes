@@ -37,7 +37,7 @@ class Model:
         num_labels = list(filter(lambda x: x[1] >= self.delta, num_labels))
         num_labels = sorted(num_labels, key=lambda x: x[1], reverse=True)
         num_labels = num_labels[:min(4, len(num_labels))]
-        num_labels = [(x, model.themes[x]) for x, y in num_labels]
+        num_labels = [(x, self.themes[x]) for x, y in num_labels]
         return num_labels
 
     def evaluate(self, X):
