@@ -34,11 +34,18 @@ class Model:
     def get_response(self, message):
         message = [self.normalize(message)]
         num_labels = zip(list(range(len(self.themes))), self.evaluate(message)[0])
+        num_labels = [(x, self.reg_coef(x, y)) for x, y in num_labels]
         num_labels = list(filter(lambda x: x[1] >= self.delta, num_labels))
         num_labels = sorted(num_labels, key=lambda x: x[1], reverse=True)
         num_labels = num_labels[:min(4, len(num_labels))]
+        print(num_labels)
         num_labels = [(x, self.themes[x]) for x, y in num_labels]
         return num_labels
+
+    def reg_coef(self, n, k):
+        if n == 0:
+            return k * 0.8
+        return k
 
     def evaluate(self, X):
         X = [self.normalize(txt) for txt in X]
@@ -95,8 +102,8 @@ if __name__ == '__main__':
     })
     df.to_csv('solution_fintech31bot_test.csv', index=False, sep=',', encoding='utf-8')"""
     # model.train()
-    # eval = model.evaluate(model.X)
-    # metric = metrics.classification_report(model.y, eval, target_names=model.themes)
-    # print(metric)
+    eval = model.evaluate(model.X)
+    metric = metrics.classification_report(model.y, eval, target_names=model.themes)
+    print(metric)
     # model.save()
-    # model.get_response("если я снимаю карты с карты деньги сбербанке с меня комиссии взимается")
+    print(model.get_response("банкомат захватил карточку"))

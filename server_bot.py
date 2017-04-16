@@ -155,6 +155,11 @@ def respond(message):
 
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
+@bot.message_handler(content_types=['document'])
+def eval_csv(message):
+    print(message)
+    
+
 '''
 bot.remove_webhook()
 
