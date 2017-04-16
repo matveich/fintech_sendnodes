@@ -105,7 +105,7 @@ def remind(message, text):  # TODO написать
 
 def forget():
     env_var['timer'].cancel()
-    print(env_var['timer_desc'] + "  отменён")
+    print(env_var['timer_desc'] + " отменён")
     env_var['expected'] = 'query'
 
 
@@ -138,6 +138,8 @@ def respond(message):
             env_var['last_theme'] = response['pos_themes'][0]
             if env_var['expected'] == 'query':
                 env_var['expected'] = 'confirmation'
+            env_var['timer'].cancel()
+            print(env_var['timer_desc'] + " отменён")
             env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])  # TODO поставить 30 секунд
             env_var['timer'].start()
             env_var['timer_desc'] = "Напомнить про конфёрм"
