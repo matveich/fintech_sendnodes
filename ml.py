@@ -100,13 +100,13 @@ class Model:
         self.clf = GridSearchCV(text_clf, params, n_jobs=-1, cv=4)
         self.clf = self.clf.fit(X, y)
 
-    def eval_csv(self, csv_file, name):
-        data = pd.read_csv(csv_file)
+    def eval_csv(self, name):
+        data = pd.read_csv(name)
         df = pd.DataFrame({
             'Index': data['Index'],
-            'ThemeLabel': [x.index(max(x)) for x in model.evaluate(data['Speech'])]
+            'ThemeLabel': [x.index(max(x)) for x in self.evaluate(data['Speech'])]
         })
-        df.to_csv(name, sep=',', index=False, encoding='utf-8')
+        df.to_csv('out_' + name, sep=',', index=False, encoding='utf-8')
 
     def load(self):
         self.clf = joblib.load('model.pkl')
@@ -116,6 +116,7 @@ class Model:
 
 
 if __name__ == '__main__':
+    """
     model = Model(load_model_from_file=True)
     test_data = pd.read_csv('test.csv')
     test_X = test_data['Speech']
@@ -130,6 +131,7 @@ if __name__ == '__main__':
         'ThemeLabel': [model.themes[x.index(max(x))] for x in model.evaluate(test_X)]
     })
     df_test.to_csv('solution_fintech31bot_test.csv', index=False, sep=',', encoding='utf-8')
+    """
     # model.train()
     # eval = model.evaluate(model.X)
     # metric = metrics.classification_report(model.y, eval, target_names=model.themes)
