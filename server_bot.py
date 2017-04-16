@@ -125,7 +125,7 @@ def respond(message):
     # If user didn't check the answer
     else:
         if env_var['expected'] == 'retry':
-            env_var['context'] = env_var['context'] + ". " + message.text  # TODO сделать
+            env_var['context'] = env_var['context'] + ". " + message.text
         elif env_var['expected'] == 'query':
             env_var['context'] = message.text
         else:
@@ -141,7 +141,7 @@ def respond(message):
             if env_var['timer']:
                 env_var['timer'].cancel()
             print(env_var['timer_desc'] + " отменён")
-            env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])  # TODO поставить 30 секунд
+            env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])
             env_var['timer'].start()
             env_var['timer_desc'] = "Напомнить про конфёрм"
             markup.add('Да', 'Нет')
