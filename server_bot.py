@@ -103,7 +103,7 @@ def respond(message):
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             env_var['last_theme'] = response['pos_themes'][0]
             env_var['expected'] = 'confirmation'
-            env_var['timer'] = Timer(30.0, remind, message)
+            env_var['timer'] = Timer(30.0, remind, [message])
             env_var['timer'].start()
             print("Timer set and counting")
             markup.add('Да', 'Нет')
