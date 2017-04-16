@@ -13,6 +13,7 @@ env_var = {
     'get_response': None,
     'expected': 'query',
     'timer': None,
+    'timer_desc': '',
     'try_count': 0,
     'context': None
 }
@@ -62,30 +63,36 @@ def check_confirmation(conf_res, expected, message):
         text = check_currency(text, env_var['last_theme'])
         env_var['expected'] = 'query'
         env_var['timer'].cancel()
+        print(env_var['timer_desc'] + "  отменён")
     else:
         if expected == 'confirmation':
             text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
             env_var['expected'] = 'retry'
             print("Awaiting retry")
             env_var['timer'].cancel()
+            print(env_var['timer_desc'] + "  отменён")
             env_var['timer'] = Timer(30.0, remind,
                                      [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос."])
             env_var['timer'].start()
+            env_var['timer_desc'] = "Ожидание перефразирования в первый раз"
             env_var['try_count'] = 1
         elif expected == 'retry':
             if env_var['try_count'] < 2:
                 text = "Не смогли определить тему вашего вопроса. Попробуйте ещё раз"
                 env_var['try_count'] += 1
                 env_var['timer'].cancel()
+                print(env_var['timer_desc'] + "  отменён")
                 env_var['timer'] = Timer(30.0, remind,
                                          [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос ещё раз."])
                 env_var['timer'].start()
+                env_var['timer_desc'] = "Ожидание перефразирования в %d раз" % env_var['try_count']
                 print("Try no. %d" % env_var['try_count'])
             else:
                 text = "Ок, я запутался, давайте начнём заново :)"
                 env_var['expected'] = 'query'
                 env_var['try_count'] = 0
                 env_var['timer'].cancel()
+                print(env_var['timer_desc'] + "  отменён")
     return text
 
 
@@ -93,10 +100,12 @@ def remind(message, text):  # TODO написать
     bot.send_message(message.chat.id, text)
     env_var['timer'] = Timer(180.0, forget)  # TODO поставить 180
     env_var['timer'].start()
+    env_var['timer_desc'] = "Ждём чтобы забыть"
 
 
 def forget():
     env_var['timer'].cancel()
+    print(env_var['timer_desc'] + "  отменён")
     env_var['expected'] = 'query'
 
 
@@ -116,7 +125,7 @@ def respond(message):
     # If user didn't check the answer
     else:
         if env_var['expected'] == 'retry':
-            env_var['context'] += message.text  # TODO сделать
+            env_var['context'] = env_var['context'] + ". " + message.text  # TODO сделать
         elif env_var['expected'] == 'query':
             env_var['context'] = message.text
         else:
