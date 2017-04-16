@@ -141,7 +141,7 @@ def respond(message):
     text = "Problemes"
     ans_type = classify_answer(message.text.lower())
     if ans_type:
-        text = check_confirmation(ans_type, users[user_id]['expected'], message)
+        text = check_confirmation(ans_type, users[user_id]['expected'], user_id)
     elif users[user_id]['expected'] == 'choice':
         if message.text.lower().split(".")[1] == "никакая из предложенных":
             text = "Не смогли определить тему вашего вопроса. Попробуйте ещё раз"
