@@ -7,6 +7,7 @@ from ml import Model
 from threading import Timer
 
 bot = telebot.TeleBot(cfg.token)
+model = Model()
 
 env_var = {
     'last_theme': None,
@@ -139,7 +140,7 @@ def respond(message):
         else:
             print("Expectations failed. Abort now!")
         print(env_var['context'])
-        response = env_var['get_response'](env_var['context'])
+        response = model.get_response(env_var['context'])
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         if len(response) == 1:
             text = "Вас интересует тема \"%s\". Да?" % response[0][1]
@@ -195,6 +196,4 @@ cherrypy.quickstart(WebhookServer(), cfg.WEBHOOK_URL_PATH, {'/': {}})
 '''
 
 if __name__ == '__main__':
-    model = Model()
-    env_var['get_response'] = model.get_response
     bot.polling(none_stop=True)
