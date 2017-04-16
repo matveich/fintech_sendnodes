@@ -113,34 +113,3 @@ class Model:
 
     def save(self):
         joblib.dump(self.clf, 'model.pkl')
-
-
-if __name__ == '__main__':
-    """import requests
-    import shutil
-    f = requests.get('http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv', stream=True)
-    with open('228.csv', 'wb') as lf:
-        f.raw.decode_content = True
-        shutil.copyfileobj(f.raw, lf)"""
-    """
-    model = Model(load_model_from_file=True)
-    test_data = pd.read_csv('test.csv')
-    test_X = test_data['Speech']
-    df = pd.DataFrame({
-        'Index': test_data['Index'],
-        'ThemeLabel': [x.index(max(x)) for x in model.evaluate(test_X)]
-    })
-    df.to_csv('solution_fintech31bot.csv', index=False, sep=',', encoding='utf-8')
-    df_test = pd.DataFrame({
-        'Index': test_data['Index'],
-        'Speech': test_X,
-        'ThemeLabel': [model.themes[x.index(max(x))] for x in model.evaluate(test_X)]
-    })
-    df_test.to_csv('solution_fintech31bot_test.csv', index=False, sep=',', encoding='utf-8')
-    """
-    # model.train()
-    # eval = model.evaluate(model.X)
-    # metric = metrics.classification_report(model.y, eval, target_names=model.themes)
-    # print(metric)
-    # model.save()
-    # print(model.get_response("где поблизости банкомат с самым высоким курсом доллара"))
