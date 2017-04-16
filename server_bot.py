@@ -100,6 +100,7 @@ def respond(message):
             env_var['last_theme'] = response['pos_themes'][0]
             env_var['expected'] = 'confirmation'
             env_var['timer'] = Timer(30.0, remind, message)
+            print("Timer set and counting")
             markup.add('Да', 'Нет')
         elif len(response['pos_themes']) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
