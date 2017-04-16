@@ -65,8 +65,18 @@ def check_confirmation(conf_res, expected):
     return text
 
 
-def remind():
-    pass
+def remind(message):  # TODO написать
+    bot.send_message(message.chat.id, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\".")
+    env_var['timer'] = Timer(180, forget)
+
+
+def forget():
+    try:
+        env_var['timer'].cancel()
+        env_var['expected'] = 'query'
+    except AttributeError:
+        print("Cancelling timer failed")
+
 
 @bot.message_handler(commands=['start'])
 def greeting(message):
@@ -77,7 +87,6 @@ def greeting(message):
 @bot.message_handler(content_types=['text'])
 def respond(message):
     global env_var
-    text = "Critical Error"
     markup = None
     ans_type = classify_answer(message.text.lower())
     if ans_type:
@@ -86,17 +95,19 @@ def respond(message):
     else:
         response = env_var['get_response'](message.text)
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        if response['type'] == "get_confirmation":
+        if len(response['pos_themes']) == 1:
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             env_var['last_theme'] = response['pos_themes'][0]
             env_var['expected'] = 'confirmation'
-            env_var['timer'] = Timer(30.0, remind)
+            env_var['timer'] = Timer(30.0, remind, message)
             markup.add('Да', 'Нет')
-        elif response['type'] == "choose_theme":
+        elif len(response['pos_themes']) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
             for theme in response['pos_themes']:
                 markup.add(theme)
             markup.add("Никакая из предложенных")
+        else:
+            text = "Произошла ошибка определения, обратитесь к Рыбкину."
 
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
