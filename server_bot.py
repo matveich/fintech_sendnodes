@@ -68,8 +68,7 @@ def check_confirmation(conf_res, expected):
 
 def remind(message):  # TODO написать
     bot.send_message(message.chat.id, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\".")
-    print("Remineder sent to " + message.chat.id)
-    env_var['timer'] = Timer(180.0, forget)
+    env_var['timer'] = Timer(20.0, forget)  # TODO поставить 180
     env_var['timer'].start()
 
 
@@ -103,7 +102,7 @@ def respond(message):
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             env_var['last_theme'] = response['pos_themes'][0]
             env_var['expected'] = 'confirmation'
-            env_var['timer'] = Timer(30.0, remind, [message])
+            env_var['timer'] = Timer(15.0, remind, [message])  # TODO поставить 30 секунд
             env_var['timer'].start()
             print("Timer set and counting")
             markup.add('Да', 'Нет')
