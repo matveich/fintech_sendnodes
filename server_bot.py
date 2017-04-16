@@ -204,12 +204,12 @@ def respond(message):
 @bot.message_handler(content_types=['document'])
 def eval_csv(message):
     print(message)
-    file_info = bot.get_file(message['document']['file_id'])
-    file_name = message['document']['file_name']
+    file_info = bot.get_file(message.document.file_id)
+    file_name = message.document.file_name
     f = requests.get('https://api.telegram.org/file/bot{0}/{1}'.format(cfg.token, file_info.file_path))
     model.eval_csv(f, file_name)
     out_csv = open(file_name, 'rb')
-    bot.send_document(message['chat']['id'], out_csv)
+    bot.send_document(message.chat.id, out_csv)
     os.remove(file_name)
 
 '''
