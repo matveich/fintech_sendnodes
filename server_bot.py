@@ -148,7 +148,7 @@ def respond(message):
         elif len(response) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
             for theme in response:
-                markup.row(theme[0], theme[1])
+                markup.row("%d" % theme[0], theme[1])
             markup.add("Никакая из предложенных")
         else:
             text = "Произошла ошибка определения, обратитесь к Рыбкину."
