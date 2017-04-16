@@ -62,11 +62,13 @@ def check_confirmation(conf_res, expected):
         text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
     env_var['expected'] = 'query'
     env_var['timer'].cancel()
+    print("Timer off")
     return text
 
 
 def remind(message):  # TODO написать
     bot.send_message(message.chat.id, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\".")
+    print("Remineder sent to " + message.chat.id)
     env_var['timer'] = Timer(180, forget)
 
 
@@ -74,6 +76,7 @@ def forget():
     try:
         env_var['timer'].cancel()
         env_var['expected'] = 'query'
+        print("Theme forgotten, moving on")
     except AttributeError:
         print("Cancelling timer failed")
 
