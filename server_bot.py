@@ -53,7 +53,7 @@ def classify_answer(mtext):
     return 0
 
 
-def check_confirmation(conf_res, expected):
+def check_confirmation(conf_res, expected, message):
     if conf_res == 1:
         if expected == 'confirmation':
             text = "В ближайшее время на ваш вопрос ответит оператор"
@@ -61,28 +61,34 @@ def check_confirmation(conf_res, expected):
             return 'Я жду вопроса ^_^'
         text = check_currency(text, env_var['last_theme'])
         env_var['expected'] = 'query'
+        env_var['timer'].cancel()
     else:
         if expected == 'confirmation':
             text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
             env_var['expected'] = 'retry'
             print("Awaiting retry")
+            env_var['timer'] = Timer(30.0, remind,
+                                     [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос."])
+            env_var['timer'].start()
             env_var['try_count'] = 1
         elif expected == 'retry':
             if env_var['try_count'] < 3:
                 text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
                 env_var['try_count'] += 1
+                env_var['timer'] = Timer(30.0, remind,
+                                         [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос."])
+                env_var['timer'].start()
                 print("Try no. %d" % env_var['try_count'])
             else:
                 text = "Ок, я запутался, давайте начнём заново :)"
                 env_var['expected'] = 'query'
                 env_var['try_count'] = 0
-
-    env_var['timer'].cancel()
+                env_var['timer'].cancel()
     return text
 
 
-def remind_confirm(message):  # TODO написать
-    bot.send_message(message.chat.id, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\".")
+def remind(message, text):  # TODO написать
+    bot.send_message(message.chat.id, text)
     env_var['timer'] = Timer(180.0, forget)  # TODO поставить 180
     env_var['timer'].start()
 
@@ -104,7 +110,7 @@ def respond(message):
     markup = None
     ans_type = classify_answer(message.text.lower())
     if ans_type:
-        text = check_confirmation(ans_type, env_var['expected'])
+        text = check_confirmation(ans_type, env_var['expected'], message)
     # If user didn't check the answer
     else:
         if env_var['expected'] == 'retry':
@@ -113,6 +119,7 @@ def respond(message):
             env_var['context'] = message.text
         else:
             print("Expectations failed. Abort now!")
+        print(env_var['context'])
         response = env_var['get_response'](env_var['context'])
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
         if len(response['pos_themes']) == 1:
@@ -120,7 +127,7 @@ def respond(message):
             env_var['last_theme'] = response['pos_themes'][0]
             if env_var['expected'] == 'query':
                 env_var['expected'] = 'confirmation'
-            env_var['timer'] = Timer(30.0, remind_confirm, [message])  # TODO поставить 30 секунд
+            env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])  # TODO поставить 30 секунд
             env_var['timer'].start()
             markup.add('Да', 'Нет')
         elif len(response['pos_themes']) < 5:
