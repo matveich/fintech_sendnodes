@@ -12,7 +12,10 @@ env_var = {
     'last_theme': None,
     'get_response': None,
     'expected': 'query',
-    'timer': None
+    'timer': None,
+    'timer_desc': '',
+    'try_count': 0,
+    'context': None
 }
 
 '''
@@ -51,22 +54,60 @@ def classify_answer(mtext):
     return 0
 
 
-def check_confirmation(conf_res, expected):
+def check_confirmation(conf_res, expected, message):
     if conf_res == 1:
         if expected == 'confirmation':
             text = "В ближайшее время на ваш вопрос ответит оператор"
         elif expected == 'query':
             return 'Я жду вопроса ^_^'
         text = check_currency(text, env_var['last_theme'])
+        env_var['expected'] = 'query'
+        env_var['timer'].cancel()
+        print(env_var['timer_desc'] + "  отменён")
     else:
-        text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
-    env_var['expected'] = 'query'
-    env_var['timer'].cancel()
+        if expected == 'confirmation':
+            text = "Не смогли определить тему вашего вопроса. Попробуйте перефразировать вопрос"
+            env_var['expected'] = 'retry'
+            print("Awaiting retry")
+            env_var['timer'].cancel()
+            print(env_var['timer_desc'] + "  отменён")
+            env_var['timer'] = Timer(30.0, remind,
+                                     [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос."])
+            env_var['timer'].start()
+            env_var['timer_desc'] = "Ожидание перефразирования в первый раз"
+            env_var['try_count'] = 1
+        elif expected == 'retry':
+            if env_var['try_count'] < 2:
+                text = "Не смогли определить тему вашего вопроса. Попробуйте ещё раз"
+                env_var['try_count'] += 1
+                env_var['timer'].cancel()
+                print(env_var['timer_desc'] + "  отменён")
+                env_var['timer'] = Timer(30.0, remind,
+                                         [message, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос ещё раз."])
+                env_var['timer'].start()
+                env_var['timer_desc'] = "Ожидание перефразирования в %d раз" % env_var['try_count']
+                print("Try no. %d" % env_var['try_count'])
+            else:
+                text = "Ок, я запутался, давайте начнём заново :)"
+                env_var['expected'] = 'query'
+                env_var['try_count'] = 0
+                env_var['timer'].cancel()
+                print(env_var['timer_desc'] + "  отменён")
     return text
 
 
-def remind():
-    pass
+def remind(message, text):  # TODO написать
+    bot.send_message(message.chat.id, text)
+    env_var['timer'] = Timer(180.0, forget)  # TODO поставить 180
+    env_var['timer'].start()
+    env_var['timer_desc'] = "Ждём чтобы забыть"
+
+
+def forget():
+    env_var['timer'].cancel()
+    print(env_var['timer_desc'] + " отменён")
+    env_var['expected'] = 'query'
+
 
 @bot.message_handler(commands=['start'])
 def greeting(message):
@@ -77,26 +118,40 @@ def greeting(message):
 @bot.message_handler(content_types=['text'])
 def respond(message):
     global env_var
-    text = "Critical Error"
     markup = None
     ans_type = classify_answer(message.text.lower())
     if ans_type:
-        text = check_confirmation(ans_type, env_var['expected'])
+        text = check_confirmation(ans_type, env_var['expected'], message)
     # If user didn't check the answer
     else:
-        response = env_var['get_response'](message.text)
+        if env_var['expected'] == 'retry':
+            env_var['context'] = env_var['context'] + ". " + message.text  # TODO сделать
+        elif env_var['expected'] == 'query':
+            env_var['context'] = message.text
+        else:
+            print("Expectations failed. Abort now!")
+        print(env_var['context'])
+        response = env_var['get_response'](env_var['context'])
         markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        if response['type'] == "get_confirmation":
+        if len(response['pos_themes']) == 1:
             text = "Вас интересует тема \"%s\". Да?" % response['pos_themes'][0]
             env_var['last_theme'] = response['pos_themes'][0]
-            env_var['expected'] = 'confirmation'
-            env_var['timer'] = Timer(30.0, remind)
+            if env_var['expected'] == 'query':
+                env_var['expected'] = 'confirmation'
+            if env_var['timer']:
+                env_var['timer'].cancel()
+            print(env_var['timer_desc'] + " отменён")
+            env_var['timer'] = Timer(30.0, remind, [message, "Мне нужен ваш ответ. Напишите \"Да\" или \"Нет\"."])  # TODO поставить 30 секунд
+            env_var['timer'].start()
+            env_var['timer_desc'] = "Напомнить про конфёрм"
             markup.add('Да', 'Нет')
-        elif response['type'] == "choose_theme":
+        elif len(response['pos_themes']) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
             for theme in response['pos_themes']:
                 markup.add(theme)
             markup.add("Никакая из предложенных")
+        else:
+            text = "Произошла ошибка определения, обратитесь к Рыбкину."
 
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
