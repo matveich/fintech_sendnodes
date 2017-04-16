@@ -166,7 +166,7 @@ def respond(message):
                 text = "В ближайшее время на ваш запрос ответит оператор"
                 users[user_id]['expected'] = 'query'
             else:
-                if users[user_id]['ans_att'] < 3:
+                if users[user_id]['ans_att'] < 2:
                     text = "Номер темы указан неправильно. Уточните, какая тема вас интересует."
                     users[user_id]['ans_att'] += 1
                 else:
