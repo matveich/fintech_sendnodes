@@ -93,6 +93,8 @@ def check_confirmation(conf_res, expected, message):
                 env_var['try_count'] = 0
                 env_var['timer'].cancel()
                 print(env_var['timer_desc'] + "  отменён")
+        else:
+            text = "Problemes"
     return text
 
 
