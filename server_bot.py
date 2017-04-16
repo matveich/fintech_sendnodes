@@ -61,6 +61,8 @@ def check_confirmation(conf_res, expected, message):
             text = "В ближайшее время на ваш вопрос ответит оператор"
         elif expected == 'query':
             return 'Я жду вопроса ^_^'
+        else:
+            text = "Error"
         text = check_currency(text, env_var['last_theme'])
         env_var['expected'] = 'query'
         env_var['timer'].cancel()
