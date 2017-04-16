@@ -119,6 +119,7 @@ def forget(user_id, fail=False):
     users[user_id]['timer'].cancel()
     if fail:
         bot.send_message(user_id, "Ок, похоже, мы оба запутались. Давайте начнём заново :)")
+        users[user_id]['expected'] = 'query'
     print(users[user_id]['timer_desc'] + " отменён")
     users[user_id]['expected'] = 'query'
 
