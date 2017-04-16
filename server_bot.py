@@ -79,7 +79,7 @@ def check_confirmation(conf_res, expected, user_id):
             users[user_id]['timer'].cancel()
             print(users[user_id]['timer_desc'] + "  отменён")
             users[user_id]['timer'] = Timer(30.0, remind,
-                                    [user_id, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос."])
+                                    [user_id, "Я все еще хочу вам помочь. Попробуйте перефразировать вопрос.", True])
             users[user_id]['timer'].start()
             users[user_id]['timer_desc'] = "Ожидание перефразирования в первый раз"
             users[user_id]['try_count'] = 1
