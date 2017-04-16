@@ -139,6 +139,7 @@ def respond(message):
             'timer': None,
             'timer_desc': '',
             'try_count': 0,
+            'ans_att': 0,
             'context': None,
             'ltn': 0
         }
@@ -162,7 +163,12 @@ def respond(message):
                 text = "В ближайшее время на ваш запрос ответит оператор"
                 users[user_id]['expected'] = 'query'
             else:
-                text = "Номер темы указан неправильно. Уточните, какая тема вас интересует."
+                if users[user_id]['ans_att'] < 3:
+                    text = "Номер темы указан неправильно. Уточните, какая тема вас интересует."
+                    users[user_id]['ans_att'] += 1
+                else:
+                    text = "Ок, похоже мы оба запутались. Давайте начнём заново :)"
+                    users[user_id]['ans_att'] = 0
         users[user_id]['timer'].cancel()
         print(users[user_id]['timer_desc'] + ' отменён')
     else:
@@ -189,6 +195,7 @@ def respond(message):
             markup.add('Да', 'Нет')
         elif len(response) < 5:
             text = "Пожалуйста, уточните, какая из тем вас интересует:"
+            users[user_id]['ans_att'] = 0;
             i = 0
             for theme in response:
                 i += 1
