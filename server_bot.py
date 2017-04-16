@@ -59,7 +59,7 @@ def classify_answer(mtext):
 
 def check_confirmation(conf_res, expected, user_id):
     if conf_res == 1:
-        if expected == 'confirmation':
+        if expected in ['confirmation', 'retry']:
             text = "В ближайшее время на ваш вопрос ответит оператор"
         elif expected == 'query':
             return 'Я жду вопроса ^_^'
